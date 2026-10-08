@@ -1,0 +1,48 @@
+@import 'tailwindcss';
+
+@font-face {
+  font-family: iranYekan;
+  src: url(./assets/fonts/iranyekan.woff2);
+}
+
+:root {
+  --brand-teal: #00a99d;
+  --brand-teal-deep: #087b79;
+  --brand-ink: #102c42;
+  --surface: #f3f8f7;
+  --surface-border: #dce9e7;
+  font-family: Tahoma, 'Segoe UI', sans-serif;
+  color-scheme: light;
+  color: var(--brand-ink);
+  background: var(--surface);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  min-width: 320px;
+  direction: rtl;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--surface);
+}
+
+#root {
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  margin: 0;
+  display: block;
+  border: 0;
+  text-align: initial;
+}
+
+* {
+  font-family: iranYekan !important;
+}
