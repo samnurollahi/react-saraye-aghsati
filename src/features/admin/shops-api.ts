@@ -50,6 +50,12 @@ export interface AdminShopPage {
   total: number
 }
 
+export interface ShopSetupTokenResponse {
+  setupToken: string
+  loginIdentifier: string
+  expiresAt: string
+}
+
 export async function getAdminShops(page: number, limit: number): Promise<AdminShopPage> {
   const payload = await apiRequest<ShopListPayload | AdminShop[]>(`/admin/shops?page=${page}&limit=${limit}`)
   if (Array.isArray(payload)) return { data: payload, page, limit, total: payload.length }
@@ -74,6 +80,10 @@ export function updateAdminShop({ id, ...input }: ShopUpdateInput & { id: string
 
 export function deleteAdminShop(id: string) {
   return apiRequest<void>(`/admin/shops/${encodeURIComponent(id)}`, { method: 'DELETE' })
+}
+
+export function provisionAdminShopCredentials(id: string) {
+  return apiRequest<ShopSetupTokenResponse>(`/admin/shops/${encodeURIComponent(id)}/credentials/setup-token`, { method: 'POST' })
 }
 
 export async function getAdminShopQr(id: string): Promise<string> {

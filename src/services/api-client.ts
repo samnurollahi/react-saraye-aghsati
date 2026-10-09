@@ -1,4 +1,5 @@
 import { clearAuth, getAccessToken, getRefreshToken, saveAuth } from './auth-storage'
+import { clearShopTokens, getShopAccessToken, getShopRefreshToken, saveShopTokens } from './shop-auth-storage'
 import type { AuthResponse, User } from '../types/domain'
 
 export class ApiError extends Error {
@@ -13,6 +14,7 @@ export class ApiError extends Error {
 
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 let refreshFlight: Promise<string> | null = null
+let shopRefreshFlight: Promise<string> | null = null
 
 function endpoint(path: string) {
   return `${apiBaseUrl}${path}`
@@ -20,6 +22,10 @@ function endpoint(path: string) {
 
 function notifySessionExpired() {
   window.dispatchEvent(new Event('saraye:session-expired'))
+}
+
+function notifyShopSessionExpired() {
+  window.dispatchEvent(new Event('saraye:shop-session-expired'))
 }
 
 function createApiError(payload: unknown, status: number) {
@@ -105,4 +111,72 @@ export async function restoreSession() {
 
 export function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof ApiError ? error.message : fallback
+}
+
+async function refreshShopAccessToken() {
+  const refreshToken = getShopRefreshToken()
+  if (!refreshToken) {
+    clearShopTokens()
+    notifyShopSessionExpired()
+    throw new ApiError('نشست فروشگاه پایان یافته است.', 401)
+  }
+
+  if (!shopRefreshFlight) {
+    shopRefreshFlight = (async () => {
+      const response = await fetch(endpoint('/shop-auth/refresh'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+      })
+      const payload: unknown = await response.json().catch(() => null)
+      if (!response.ok) throw createApiError(payload, response.status)
+      const tokens = payload as { accessToken: string; refreshToken: string }
+      saveShopTokens(tokens)
+      return tokens.accessToken
+    })()
+  }
+
+  try {
+    return await shopRefreshFlight
+  } catch (error) {
+    clearShopTokens()
+    notifyShopSessionExpired()
+    throw error
+  } finally {
+    shopRefreshFlight = null
+  }
+}
+
+export async function shopApiRequest<T>(path: string, init: RequestInit = {}, authenticated = true): Promise<T> {
+  const headers = new Headers(init.headers)
+  if (init.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json')
+  if (authenticated) {
+    const accessToken = getShopAccessToken()
+    if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`)
+  }
+
+  const response = await fetch(endpoint(path), { ...init, headers })
+  if (response.status === 401 && authenticated) {
+    try {
+      const nextAccessToken = await refreshShopAccessToken()
+      headers.set('Authorization', `Bearer ${nextAccessToken}`)
+      const retry = await fetch(endpoint(path), { ...init, headers })
+      const retryPayload: unknown = await retry.json().catch(() => null)
+      if (!retry.ok) {
+        if (retry.status === 401) {
+          clearShopTokens()
+          notifyShopSessionExpired()
+        }
+        throw createApiError(retryPayload, retry.status)
+      }
+      return retryPayload as T
+    } catch (error) {
+      if (error instanceof ApiError) throw error
+      throw new ApiError('نشست فروشگاه پایان یافته است. دوباره وارد شوید.', 401)
+    }
+  }
+
+  const payload: unknown = await response.json().catch(() => null)
+  if (!response.ok) throw createApiError(payload, response.status)
+  return payload as T
 }

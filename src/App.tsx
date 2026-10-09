@@ -20,16 +20,12 @@ import { TransactionHistoryPage } from './features/transactions/TransactionHisto
 import { NotificationsPage } from './features/notifications/NotificationsPage'
 import { HomePage } from './pages/HomePage'
 import type { UserRole } from './types/domain'
-
-function RoleHome() {
-  const { user } = useAuth()
-  return <Navigate to={user?.role === 'admin' ? '/admin/dashboard' : '/user/dashboard'} replace />
-}
+import { RequireShopAuth, ShopPublicOnly } from './features/shop/ShopRouteGuards'
+import { ShopDashboardPage, ShopLayout, ShopLoginPage, ShopProfilePage, ShopSetupPasswordPage, ShopTransactionsPage } from './features/shop/ShopPages'
 
 function PublicOnly() {
-  const { user, isRestoring } = useAuth()
+  const { isRestoring } = useAuth()
   if (isRestoring) return <Stack sx={{ minHeight: '100vh', alignItems: 'center', justifyContent: 'center' }}><CircularProgress /></Stack>
-  // return user ? <RoleHome /> : <Outlet />
   return <Outlet />
 }
 
@@ -44,6 +40,18 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+      </Route>
+      <Route element={<ShopPublicOnly />}>
+        <Route path="/shop/login" element={<ShopLoginPage />} />
+        <Route path="/shop/setup-password" element={<ShopSetupPasswordPage />} />
+      </Route>
+      <Route path="/shop" element={<RequireShopAuth />}>
+        <Route element={<ShopLayout />}>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<ShopDashboardPage />} />
+          <Route path="transactions" element={<ShopTransactionsPage />} />
+          <Route path="profile" element={<ShopProfilePage />} />
+        </Route>
       </Route>
       <Route path="/user" element={<RoleRoute role="user" />}>
         <Route element={<UserLayout />}>

@@ -11,6 +11,7 @@ import { prefixer } from 'stylis'
 import rtlPlugin from 'stylis-plugin-rtl'
 import App from './App.tsx'
 import { AuthProvider } from './features/auth/AuthProvider'
+import { ShopAuthProvider } from './features/shop/ShopAuthProvider'
 import { theme } from './theme'
 import './index.css'
 
@@ -27,7 +28,7 @@ createRoot(document.getElementById('root')!).render(
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>
             <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}>
-              <AuthProvider><App /></AuthProvider>
+              <AuthProvider><ShopAuthProvider><App /></ShopAuthProvider></AuthProvider>
             </SnackbarProvider>
           </BrowserRouter>
         </QueryClientProvider>

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createAdminShop, deleteAdminShop, getAdminShopQr, getAdminShops, updateAdminShop } from './shops-api'
+import { createAdminShop, deleteAdminShop, getAdminShopQr, getAdminShops, provisionAdminShopCredentials, updateAdminShop } from './shops-api'
 import type { ShopInput, ShopUpdateInput } from './shops-api'
 
 export const adminShopKeys = {
@@ -38,4 +38,8 @@ export function useDeleteAdminShop() {
     mutationFn: (id: string) => deleteAdminShop(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: adminShopKeys.all }),
   })
+}
+
+export function useProvisionAdminShopCredentials() {
+  return useMutation({ mutationFn: (id: string) => provisionAdminShopCredentials(id), gcTime: 0 })
 }
