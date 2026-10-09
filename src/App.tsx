@@ -29,7 +29,8 @@ function RoleHome() {
 function PublicOnly() {
   const { user, isRestoring } = useAuth()
   if (isRestoring) return <Stack sx={{ minHeight: '100vh', alignItems: 'center', justifyContent: 'center' }}><CircularProgress /></Stack>
-  return user ? <RoleHome /> : <Outlet />
+  // return user ? <RoleHome /> : <Outlet />
+  return <Outlet />
 }
 
 function RoleRoute({ role }: { role: UserRole }) {
