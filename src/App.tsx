@@ -18,6 +18,7 @@ import { UserLayout } from './layouts/UserLayout'
 import { PurchasePage } from './features/transactions/PurchasePage'
 import { TransactionHistoryPage } from './features/transactions/TransactionHistoryPage'
 import { NotificationsPage } from './features/notifications/NotificationsPage'
+import { HomePage } from './pages/HomePage'
 import type { UserRole } from './types/domain'
 
 function RoleHome() {
@@ -39,11 +40,9 @@ export default function App() {
   return (
     <Routes>
       <Route element={<PublicOnly />}>
+        <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-      </Route>
-      <Route path="/" element={<RequireAuth />}>
-        <Route index element={<RoleHome />} />
       </Route>
       <Route path="/user" element={<RoleRoute role="user" />}>
         <Route element={<UserLayout />}>
