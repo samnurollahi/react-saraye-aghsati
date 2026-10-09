@@ -7,7 +7,7 @@ export interface AdminInstallment {
   dueDate: string
   status: 'pending' | 'paid' | 'overdue'
   paidAt?: string | null
-  user?: { id?: string; fullName?: string; nationalCode?: string }
+  user?: { id?: string; fullName?: string; nationalCode?: string, phone?: string }
   userName?: string
   loan?: { id?: string }
 }
